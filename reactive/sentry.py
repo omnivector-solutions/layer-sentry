@@ -21,7 +21,10 @@ from charmhelpers.core import unitdata
 from charms.layer.sentry import (
     render_sentry_config,
     start_restart,
-    SENTRY_SERVICE
+    SENTRY_BIN,
+    SENTRY_WEB_SERVICE,
+    SENTRY_WORKER_SERVICE,
+    SENTRY_CRON_SERVICE
 )
 
 
@@ -50,8 +53,8 @@ def check_user_provided_redis():
         clear_flag('sentry.manual.redis.available')
         log("Manual redis not configured")
     else:
-        redis_host = config('redis-data-uri').split(":")[0]
-        redis_port = config('redis-data-uri').split(":")[1]
+        redis_host = config('redis-uri').split(":")[0]
+        redis_port = config('redis-uri').split(":")[1]
         kv.set('redis_host', redis_host)
         kv.set('redis_port', redis_port)
         set_flag('sentry.manual.redis.available')
@@ -70,10 +73,10 @@ def request_postgresql_database(pgsql):
     status_set('maintenance', 'Requesting database for sentry')
 
     pgsql.set_database(conf.get('db-name', 'sentry'))
-    if conf.get('db-roles', ''):
-        pgsql.set_roles(conf.get('db-roles'))
+
     if conf.get('db-extensions', ''):
         pgsql.set_extensions(conf.get('db-extensions'))
+
     status_set('active', 'Database requested')
     set_flag('sentry.database.requested')
 
@@ -105,9 +108,10 @@ def get_all_redis_relation_info():
     """
     status_set('maintenance', 'Getting Redis info')
 
-    for redis_node in endpoint_from_flag('redis.available'):
-        kv.set('redis_host', redis_node['host'])
-        kv.set('redis_port', redis_node['port'])
+    for application in endpoint_from_flag('redis.available').relation_data():
+        for redis_node in application['hosts']:
+            kv.set('redis_host', redis_node['host'])
+            kv.set('redis_port', redis_node['port'])
 
     status_set('active', 'Redis connection details saved.')
 
@@ -128,7 +132,9 @@ def config_sentry():
     status_set('maintenance', 'Configuring Sentry')
     render_sentry_config()
 
-    start_restart(SENTRY_SERVICE)
+    start_restart(SENTRY_WEB_SERVICE)
+    start_restart(SENTRY_WORKER_SERVICE)
+    start_restart(SENTRY_CRON_SERVICE)
 
     status_set('active', 'Sentry configured')
     set_flag('sentry.config.available')
@@ -141,12 +147,27 @@ def init_sentry_db():
     """
     status_set('maintenance', 'Migrating Sentry DB')
 
-    render_sentry_config()
-    call('/snap/bin/sentry upgrade'.split())
+    call('{} upgrade'.format(SENTRY_BIN).split())
 
-    status_set('maintenance', 'Configuring Sentry.')
-    render_sentry_config()
+    status_set('active', 'Sentry database available')
     set_flag('sentry.database.available')
+
+
+@when('sentry.database.available')
+@when_not('sentry.superuser.available')
+def create_sentry_superuser():
+    status_set('maintenance', 'Creating Sentry SU')
+
+    ctxt = {'bin': SENTRY_BIN,
+            'email': config('admin-email'),
+            'password': config('admin-password')}
+
+    cmd = ('{bin} createuser --email {email} --password {password} '
+           '--superuser --no-input'.format(**ctxt))
+
+    call(cmd.split())
+    status_set('active', 'Sentry SU available')
+    set_flag('sentry.superuser.available')
 
 
 @when('sentry.config.available')

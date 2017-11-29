@@ -3,6 +3,7 @@ import os
 from jinja2 import Environment, FileSystemLoader
 
 from charmhelpers.core import unitdata
+from charmhelpers.core.hookenv import charm_dir, config
 
 from charmhelpers.core.host import (
     chownr,
@@ -12,20 +13,24 @@ from charmhelpers.core.host import (
 )
 
 
-REDIS_SERVICE = 'snap.sentry.sentry-web'
+SENTRY_WEB_SERVICE = 'snap.sentry.sentry-web'
+
+SENTRY_WORKER_SERVICE = 'snap.sentry.sentry-web'
+
+SENTRY_CRON_SERVICE = 'snap.sentry.sentry-web'
 
 SENTRY_CONF_DIR = \
     os.path.join('/', 'var', 'snap', 'sentry',
                  'common', 'etc', 'sentry')
 
-SENTRY_CONF_PY = \
+SENTRY_CONFIG_PY = \
     os.path.join(SENTRY_CONF_DIR, 'sentry.conf.py')
 
-SENTRY_CONF_YML = \
+SENTRY_CONFIG_YML = \
     os.path.join(SENTRY_CONF_DIR, 'config.yml')
 
 SENTRY_BIN = \
-    os.path.join('/', 'snap', 'sentry', 'current', 'bin', 'sentry')
+    os.path.join('/', 'snap', 'bin', 'sentry.sentry-cli')
 
 
 kv = unitdata.kv()
