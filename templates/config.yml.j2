@@ -1,0 +1,12 @@
+system.secret-key: '6)#%247#@e42&d!@@3(x#_0p=&p^hkln(585pf(_89c6k6ofo-'
+
+redis.clusters:
+  default:
+    hosts:
+      0:
+        host: {{secrets['redis_host']}}
+        port: {{secrets['redis_port']}}
+
+filestore.backend: 'filesystem'
+filestore.options:
+  location: '/tmp/sentry-files'

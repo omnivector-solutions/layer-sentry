@@ -1,0 +1,19 @@
+options:
+  password:
+    type: string
+    default: ""
+    description: |
+      Require clients to issue AUTH <PASSWORD> before processing any other
+      commands.
+  db-uri:
+    type: string
+    default: ""
+    description: |
+      Postgresql URI
+  redis-uri:
+    type: string
+    default: ""
+    description: |
+      Redis URI
+ 
+ 
