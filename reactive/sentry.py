@@ -130,6 +130,7 @@ def config_sentry():
     """
 
     status_set('maintenance', 'Configuring Sentry')
+    call('{} init'.format(SENTRY_BIN).split())
     render_sentry_config()
 
     start_restart(SENTRY_WEB_SERVICE)
@@ -147,7 +148,7 @@ def init_sentry_db():
     """
     status_set('maintenance', 'Migrating Sentry DB')
 
-    call('{} upgrade'.format(SENTRY_BIN).split())
+    call('{} upgrade --noinput'.format(SENTRY_BIN).split())
 
     status_set('active', 'Sentry database available')
     set_flag('sentry.database.available')
