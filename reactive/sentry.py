@@ -141,13 +141,8 @@ def get_all_redis_relation_info():
 def config_sentry():
     """Write out sentry configs
     """
-
     status_set('maintenance', 'Configuring Sentry')
     render_sentry_config()
-
-    start_restart(SENTRY_WEB_SERVICE)
-    start_restart(SENTRY_WORKER_SERVICE)
-    start_restart(SENTRY_CRON_SERVICE)
 
     status_set('active', 'Sentry configured')
     set_flag('sentry.config.available')
@@ -161,6 +156,10 @@ def init_sentry_db():
     status_set('maintenance', 'Migrating Sentry DB')
 
     call('{} upgrade --noinput'.format(SENTRY_BIN).split())
+
+    start_restart(SENTRY_WEB_SERVICE)
+    start_restart(SENTRY_WORKER_SERVICE)
+    start_restart(SENTRY_CRON_SERVICE)
 
     status_set('active', 'Sentry database available')
     set_flag('sentry.database.available')
