@@ -34,6 +34,15 @@ PRIVATE_IP = network_get('http')['ingress-addresses'][0]
 kv = unitdata.kv()
 
 
+# Do this ASAP to prevent the systemd services installed by the snap to restart
+# in a loop because the configuration is missing
+@when('snap.installed.sentry')
+@when_not('sentry.init.available')
+def sentry_init():
+    call('{} init'.format(SENTRY_BIN).split())
+    set_flag('sentry.init.available')
+
+
 @when_not('manual.database.check.available')
 def check_user_provided_database():
     if not config('db-uri'):
@@ -102,23 +111,22 @@ def get_set_postgresql_data(pgsql):
     set_flag('sentry.juju.database.available')
 
 
-@when('redis.available')
+@when('endpoint.redis.available')
+@when_not('sentry.juju.redis.available')
 def get_all_redis_relation_info():
     """Get redis info
     """
     status_set('maintenance', 'Getting Redis info')
 
-    for application in endpoint_from_flag('redis.available').relation_data():
-        for redis_node in application['hosts']:
-            kv.set('redis_host', redis_node['host'])
-            kv.set('redis_port', redis_node['port'])
+    redis_nodes = endpoint_from_flag('endpoint.redis.available').relation_data()
+    kv.set('redis_host', redis_nodes[0]['host'])
+    kv.set('redis_port', redis_nodes[0]['port'])
 
     status_set('active', 'Redis connection details saved.')
 
     set_flag('sentry.juju.redis.available')
     clear_flag('sentry.config.available')
     clear_flag('sentry.manual.redis.available')
-    clear_flag('redis.available')
 
 
 @when_not('sentry.config.available')
@@ -130,7 +138,6 @@ def config_sentry():
     """
 
     status_set('maintenance', 'Configuring Sentry')
-    call('{} init'.format(SENTRY_BIN).split())
     render_sentry_config()
 
     start_restart(SENTRY_WEB_SERVICE)
