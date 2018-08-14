@@ -13,11 +13,11 @@ from charmhelpers.core.host import (
 )
 
 
-SENTRY_WEB_SERVICE = 'snap.sentry.sentry-web'
+SENTRY_WEB_SERVICE = 'snap.sentry.web'
 
-SENTRY_WORKER_SERVICE = 'snap.sentry.sentry-web'
+SENTRY_WORKER_SERVICE = 'snap.sentry.worker'
 
-SENTRY_CRON_SERVICE = 'snap.sentry.sentry-web'
+SENTRY_CRON_SERVICE = 'snap.sentry.cron'
 
 SENTRY_CONF_DIR = \
     os.path.join('/', 'root', 'snap', 'sentry',
