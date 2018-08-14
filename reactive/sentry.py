@@ -18,6 +18,8 @@ from charmhelpers.core.hookenv import (
 
 from charmhelpers.core import unitdata
 
+from charmhelpers.core.host import service_stop
+
 from charms.layer.sentry import (
     render_sentry_config,
     start_restart,
@@ -39,6 +41,9 @@ kv = unitdata.kv()
 @when('snap.installed.sentry')
 @when_not('sentry.init.available')
 def sentry_init():
+    service_stop(SENTRY_WEB_SERVICE)
+    service_stop(SENTRY_WORKER_SERVICE)
+    service_stop(SENTRY_CRON_SERVICE)
     call('{} init'.format(SENTRY_BIN).split())
     set_flag('sentry.init.available')
 
