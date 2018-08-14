@@ -11,7 +11,7 @@ options:
       channel: edge
       devmode: false
       jailmode: false
-      dangerous: true
-      classic: true
+      dangerous: false
+      classic: false
       revision: null
 repo: "https://github.com:CanonicalLtd/layer-sentry"
