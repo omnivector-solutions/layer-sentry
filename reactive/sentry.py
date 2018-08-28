@@ -194,6 +194,6 @@ def open_sentry_port():
 @when('sentry.port.available')
 def set_http_relation_data():
     endpoint = endpoint_from_flag('http.available')
-    ctxt = {'host': PRIVATE_IP, 'port': 9000}
+    ctxt = {'hostname': PRIVATE_IP, 'port': 9000}
     endpoint.configure(**ctxt)
     clear_flag('http.available')
