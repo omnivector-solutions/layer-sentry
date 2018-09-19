@@ -6,7 +6,6 @@ from charmhelpers.core import unitdata
 from charmhelpers.core.hookenv import charm_dir, config
 
 from charmhelpers.core.host import (
-    chownr,
     service_running,
     service_start,
     service_restart
