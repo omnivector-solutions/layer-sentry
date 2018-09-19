@@ -1,4 +1,5 @@
 name: sentry
+display-name: Sentry
 summary: Traceback aggregator
 maintainer: James Beedy <jamesbeedy@gmail.com>
 description: |
@@ -8,6 +9,7 @@ tags:
 subordinate: false
 series:
 - xenial
+- bionic
 provides:
   http:
     interface: http
@@ -20,4 +22,4 @@ resources:
   sentry:
     type: file
     filename: sentry.snap
-    description: Semtry snap
+    description: Sentry snap
