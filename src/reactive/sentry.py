@@ -22,6 +22,7 @@ from charmhelpers.core.hookenv import (
 from charmhelpers.core import unitdata
 
 from charms.layer.sentry import (
+    gen_random_string,
     render_sentry_config,
     start_restart,
     SENTRY_BIN,
@@ -29,6 +30,8 @@ from charms.layer.sentry import (
     SENTRY_WORKER_SERVICE,
     SENTRY_CRON_SERVICE
 )
+
+from charms.leadership import leader_get, leader_set
 
 
 SENTRY_HTTP_PORT = 9000
@@ -40,6 +43,18 @@ kv = unitdata.kv()
 @hook('start')
 def set_started_flag():
     set_flag('sentry.juju.started')
+
+
+@when_not('leadership.set.system_secret_key')
+@when('leadership.is_leader')
+def set_sentry_system_key_to_leader():
+    conf = config()
+    system_secret_key = conf.get('system-secret-key')
+    if system_secret_key:
+        pass
+    else:
+        system_secret_key=gen_random_string()
+    leader_set(system_secret_key=system_secret_key)
 
 
 @when_not('manual.database.check.available')
@@ -134,7 +149,8 @@ def get_redis_relation_info():
     clear_flag('endpoint.redis.available')
 
 
-@when('snap.installed.sentry')
+@when('snap.installed.sentry',
+      'leadership.set.system_secret_key')
 @when_any('sentry.juju.redis.available',
           'sentry.manual.redis.available')
 @when_any('sentry.juju.database.available',
