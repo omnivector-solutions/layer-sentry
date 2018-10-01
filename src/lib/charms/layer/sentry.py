@@ -119,7 +119,7 @@ def return_secrets(secrets=None):
     secrets_mod['postgresql_user'] = kv.get('postgresql_user')
     secrets_mod['postgresql_password'] = kv.get('postgresql_password')
     secrets_mod['postgresql_dbname'] = kv.get('postgresql_dbname')
-    secrets_mod['system_secret_key'] = leader_get('sentry_secret_key')
+    secrets_mod['system_secret_key'] = leader_get('system_secret_key')
 
     if conf.get('aws-key'):
         secrets_mod['AWS_KEY'] = config('aws-key')
