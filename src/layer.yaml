@@ -2,6 +2,7 @@ includes:
   - 'layer:basic'
   - 'layer:metrics'
   - 'layer:snap'
+  - 'layer:leadership'
   - 'interface:redis'
   - 'interface:pgsql'
   - 'interface:http'

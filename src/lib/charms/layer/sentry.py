@@ -1,4 +1,6 @@
 import os
+import string
+import random
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -10,6 +12,8 @@ from charmhelpers.core.host import (
     service_start,
     service_restart
 )
+
+from charms.leadership import leader_get
 
 
 SENTRY_WEB_SERVICE = 'snap.sentry.sentry-web'
@@ -33,6 +37,10 @@ SENTRY_BIN = \
 
 
 kv = unitdata.kv()
+
+
+def gen_random_string(size=50, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
 
 
 def start_restart(service):
@@ -111,6 +119,7 @@ def return_secrets(secrets=None):
     secrets_mod['postgresql_user'] = kv.get('postgresql_user')
     secrets_mod['postgresql_password'] = kv.get('postgresql_password')
     secrets_mod['postgresql_dbname'] = kv.get('postgresql_dbname')
+    secrets_mod['system_secret_key'] = leader_get('system_secret_key')
 
     if conf.get('aws-key'):
         secrets_mod['AWS_KEY'] = config('aws-key')

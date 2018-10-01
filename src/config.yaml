@@ -29,5 +29,10 @@ options:
     default: ""
     description: |
       Redis URI
+  system-secret-key:
+    type: string
+    default: ""
+    description: |
+      Secret key for session signing
  
  
