@@ -260,4 +260,4 @@ def block_on_no_redis():
 def migrate_sentry_db_on_upgrade():
     status_set('maintenance', 'Migrating Sentry DB')
     call('{} upgrade --noinput'.format(SENTRY_BIN).split())
-    status_set('active', 'Sentry migration complete')
+    status_set('active', 'Sentry DB migration complete')
