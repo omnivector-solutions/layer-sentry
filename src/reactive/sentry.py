@@ -1,19 +1,22 @@
 from subprocess import call
+from urllib.parse import urlparse
 
 from charms.reactive import (
     clear_flag,
     endpoint_from_flag,
+    hook,
     set_flag,
     when,
+    when_any,
     when_not,
 )
 
 from charmhelpers.core.hookenv import (
-    network_get,
-    log,
-    status_set,
     config,
-    open_port
+    log,
+    open_port,
+    status_set,
+    unit_private_ip,
 )
 
 from charmhelpers.core import unitdata
@@ -21,6 +24,7 @@ from charmhelpers.core import unitdata
 from charmhelpers.core.host import service_stop
 
 from charms.layer.sentry import (
+    gen_random_string,
     render_sentry_config,
     start_restart,
     SENTRY_BIN,
@@ -29,8 +33,10 @@ from charms.layer.sentry import (
     SENTRY_CRON_SERVICE
 )
 
+from charms.leadership import leader_get, leader_set
 
-PRIVATE_IP = network_get('http')['ingress-addresses'][0]
+
+SENTRY_HTTP_PORT = 9000
 
 
 kv = unitdata.kv()
@@ -46,6 +52,22 @@ def sentry_init():
     service_stop(SENTRY_CRON_SERVICE)
     call('{} init'.format(SENTRY_BIN).split())
     set_flag('sentry.init.available')
+
+@hook('start')
+def set_started_flag():
+    set_flag('sentry.juju.started')
+
+
+@when_not('leadership.set.system_secret_key')
+@when('leadership.is_leader')
+def set_sentry_system_key_to_leader():
+    conf = config()
+    system_secret_key = conf.get('system-secret-key')
+    if system_secret_key:
+        pass
+    else:
+        system_secret_key=gen_random_string()
+    leader_set(system_secret_key=system_secret_key)
 
 
 @when_not('manual.database.check.available')
@@ -67,10 +89,12 @@ def check_user_provided_redis():
         clear_flag('sentry.manual.redis.available')
         log("Manual redis not configured")
     else:
-        redis_host = config('redis-uri').split(":")[0]
-        redis_port = config('redis-uri').split(":")[1]
-        kv.set('redis_host', redis_host)
-        kv.set('redis_port', redis_port)
+        o = urlparse(config('redis-uri'))
+        kv.set('redis_uri', config('redis-uri'))
+        kv.set('redis_host', o.hostname)
+        kv.set('redis_port', o.port)
+        if o.password:
+            kv.set('redis_password', o.password)
         set_flag('sentry.manual.redis.available')
         clear_flag('sentry.config.available')
         clear_flag('sentry.juju.redis.available')
@@ -88,7 +112,7 @@ def request_postgresql_database(pgsql):
 
     pgsql.set_database(conf.get('db-name', 'sentry'))
 
-    if conf.get('db-extensions', ''):
+    if conf.get('db-extensions'):
         pgsql.set_extensions(conf.get('db-extensions'))
 
     status_set('active', 'Database requested')
@@ -98,7 +122,7 @@ def request_postgresql_database(pgsql):
 @when('postgresql.master.available',
       'sentry.database.requested')
 @when_not('sentry.juju.database.available')
-def get_set_postgresql_data(pgsql):
+def get_set_juju_postgresql_data(pgsql):
     """Get/set postgresql details
     """
     status_set('maintenance', 'Database acquired, saving details')
@@ -118,37 +142,45 @@ def get_set_postgresql_data(pgsql):
 
 @when('endpoint.redis.available')
 @when_not('sentry.juju.redis.available')
-def get_all_redis_relation_info():
-    """Get redis info
+def get_redis_relation_info():
+    """Get redis relation info
     """
     status_set('maintenance', 'Getting Redis info')
+    endpoint = endpoint_from_flag('endpoint.redis.available')
+    redis = endpoint.relation_data()[0]
 
-    redis_nodes = endpoint_from_flag('endpoint.redis.available').relation_data()
-    kv.set('redis_host', redis_nodes[0]['host'])
-    kv.set('redis_port', redis_nodes[0]['port'])
+    kv.set('redis_host', redis['host'])
+    kv.set('redis_port', redis['port'])
+    if redis.get('password'):
+        kv.set('redis_password', redis['password'])
 
     status_set('active', 'Redis connection details saved.')
 
     set_flag('sentry.juju.redis.available')
     clear_flag('sentry.config.available')
     clear_flag('sentry.manual.redis.available')
+    clear_flag('endpoint.redis.available')
 
 
-@when_not('sentry.config.available')
 @when('snap.installed.sentry',
-      'sentry.juju.redis.available',
-      'sentry.juju.database.available')
-def config_sentry():
-    """Write out sentry configs
+      'leadership.set.system_secret_key')
+@when_any('sentry.juju.redis.available',
+          'sentry.manual.redis.available')
+@when_any('sentry.juju.database.available',
+          'sentry.manual.database.available')
+@when_not('sentry.init.config.available')
+def init_sentry():
+    """Write out sentry configs, restart daemons to initialize.
     """
     status_set('maintenance', 'Configuring Sentry')
+
     render_sentry_config()
 
     status_set('active', 'Sentry configured')
-    set_flag('sentry.config.available')
+    set_flag('sentry.init.config.available')
 
 
-@when('sentry.config.available')
+@when('sentry.init.config.available')
 @when_not('sentry.database.available')
 def init_sentry_db():
     """Initialize the sentry database
@@ -182,18 +214,42 @@ def create_sentry_superuser():
     set_flag('sentry.superuser.available')
 
 
-@when('sentry.config.available')
-@when_not('sentry.port.available')
+@when('sentry.database.available',
+      'sentry.superuser.available')
+@when_not('sentry.init.complete')
+def set_sentry_init_complete():
+    set_flag('sentry.init.complete')
+
+
+@when('sentry.init.complete')
+@when_not('sentry.http.port.available')
 def open_sentry_port():
-    open_port(9000)
+    open_port(SENTRY_HTTP_PORT)
     status_set('active', 'Sentry available')
-    set_flag('sentry.port.available')
+    set_flag('sentry.http.port.available')
 
 
 @when('http.available')
-@when('sentry.port.available')
+@when('sentry.http.port.available')
 def set_http_relation_data():
     endpoint = endpoint_from_flag('http.available')
-    ctxt = {'hostname': PRIVATE_IP, 'port': 9000}
-    endpoint.configure(**ctxt)
+    endpoint.configure(SENTRY_HTTP_PORT)
     clear_flag('http.available')
+
+
+@when('sentry.juju.started')
+@when_not('postgresql.connected',
+          'sentry.manual.database.available')
+def block_on_no_db():
+    status_set('blocked',
+               "Need database info via config or relation to proceed")
+    return
+
+
+@when('sentry.juju.started')
+@when_not('endpoint.redis.joined',
+          'sentry.manual.redis.available')
+def block_on_no_redis():
+    status_set('blocked',
+               "Need redis info via config or relation to proceed")
+    return

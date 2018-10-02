@@ -1,6 +1,7 @@
 name: sentry
+display-name: Sentry
 summary: Traceback aggregator
-maintainer: Canonical Ltd
+maintainer: James Beedy <jamesbeedy@gmail.com>
 description: |
   Open-source error tracking that helps developers monitor and fix crashes in real time. Iterate continuously. Boost efficiency. Improve user experience.
 tags:

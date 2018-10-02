@@ -2,16 +2,17 @@ includes:
   - 'layer:basic'
   - 'layer:metrics'
   - 'layer:snap'
+  - 'layer:leadership'
   - 'interface:redis'
   - 'interface:pgsql'
   - 'interface:http'
 options:
   snap:
     sentry:
-      channel: edge
+      channel: stable
       devmode: false
       jailmode: false
       dangerous: false
       classic: false
       revision: null
-repo: "https://github.com:CanonicalLtd/layer-sentry"
+repo: "https://github.com:omnivector-solutions/layer-sentry"
