@@ -26,6 +26,7 @@ from charmhelpers.core.host import service_stop
 from charms.layer.sentry import (
     gen_random_string,
     render_sentry_config,
+    render_web_override,
     start_restart,
     SENTRY_BIN,
     SENTRY_WEB_SERVICE,
@@ -256,8 +257,16 @@ def block_on_no_redis():
     return
 
 
+@when('config.changed.web-override')
+def update_web_override():
+    render_web_override()
+    call(['systemctl', 'daemon-reload'])
+    start_restart(SENTRY_WEB_SERVICE)
+
+
 @hook('upgrade-charm')
 def migrate_sentry_db_on_upgrade():
     status_set('maintenance', 'Migrating Sentry DB')
     call('{} upgrade --noinput'.format(SENTRY_BIN).split())
     status_set('active', 'Sentry DB migration complete')
+
