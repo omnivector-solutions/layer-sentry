@@ -7,28 +7,20 @@ You may optionally specify your own sentry.snap as a resource to this charm.
 
 
 ### Usage
-1. Deploy the primary components; sentry, postgresql, redis, haproxy.
-
+##### 1. Deploy the primary components; sentry, postgresql, redis, haproxy.
 ```bash
 juju deploy cs:~omnivector/sentry
-
 juju deploy cs:~omnivector/redis
-
 juju deploy postgresql
-
 juju deploy haproxy
 ```
 
-2. Make the relations.
-
+##### 2. Make the relations.
 ```bash
 juju relate sentry redis
-
 juju relate sentry postgresql:db
-
 juju relate sentry haproxy
 ```
-
 When the deploy is complete you may find the sentry service at the haproxy ip address endpoint.
 
 
