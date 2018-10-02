@@ -16,15 +16,15 @@ from charmhelpers.core.host import (
 from charms.leadership import leader_get
 
 
-SENTRY_WEB_SERVICE = 'snap.sentry.sentry-web'
+SENTRY_WEB_SERVICE = 'snap.sentry.web'
 
-SENTRY_WORKER_SERVICE = 'snap.sentry.sentry-web'
+SENTRY_WORKER_SERVICE = 'snap.sentry.worker'
 
-SENTRY_CRON_SERVICE = 'snap.sentry.sentry-web'
+SENTRY_CRON_SERVICE = 'snap.sentry.cron'
 
 SENTRY_CONF_DIR = \
-    os.path.join('/', 'var', 'snap', 'sentry',
-                 'common', 'etc', 'sentry')
+    os.path.join('/', 'root', 'snap', 'sentry',
+                 'current', '.sentry')
 
 SENTRY_CONFIG_PY = \
     os.path.join(SENTRY_CONF_DIR, 'sentry.conf.py')
@@ -33,7 +33,7 @@ SENTRY_CONFIG_YML = \
     os.path.join(SENTRY_CONF_DIR, 'config.yml')
 
 SENTRY_BIN = \
-    os.path.join('/', 'snap', 'bin', 'sentry.sentry-cli')
+    os.path.join('/', 'snap', 'bin', 'sentry')
 
 
 kv = unitdata.kv()

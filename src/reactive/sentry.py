@@ -21,6 +21,8 @@ from charmhelpers.core.hookenv import (
 
 from charmhelpers.core import unitdata
 
+from charmhelpers.core.host import service_stop
+
 from charms.layer.sentry import (
     gen_random_string,
     render_sentry_config,
@@ -40,6 +42,18 @@ SENTRY_HTTP_PORT = 9000
 kv = unitdata.kv()
 
 
+# Do this ASAP to prevent the systemd services installed by the snap to restart
+# in a loop because the configuration is missing
+@when('snap.installed.sentry')
+@when_not('sentry.init.available')
+def sentry_init():
+    service_stop(SENTRY_WEB_SERVICE)
+    service_stop(SENTRY_WORKER_SERVICE)
+    service_stop(SENTRY_CRON_SERVICE)
+    call('{} init'.format(SENTRY_BIN).split())
+    set_flag('sentry.init.available')
+
+
 @hook('start')
 def set_started_flag():
     set_flag('sentry.juju.started')
@@ -53,7 +67,7 @@ def set_sentry_system_key_to_leader():
     if system_secret_key:
         pass
     else:
-        system_secret_key=gen_random_string()
+        system_secret_key = gen_random_string()
     leader_set(system_secret_key=system_secret_key)
 
 
@@ -159,14 +173,9 @@ def get_redis_relation_info():
 def init_sentry():
     """Write out sentry configs, restart daemons to initialize.
     """
-
     status_set('maintenance', 'Configuring Sentry')
 
     render_sentry_config()
-
-    start_restart(SENTRY_WEB_SERVICE)
-    start_restart(SENTRY_WORKER_SERVICE)
-    start_restart(SENTRY_CRON_SERVICE)
 
     status_set('active', 'Sentry configured')
     set_flag('sentry.init.config.available')
@@ -179,7 +188,11 @@ def init_sentry_db():
     """
     status_set('maintenance', 'Migrating Sentry DB')
 
-    call('{} upgrade'.format(SENTRY_BIN).split())
+    call('{} upgrade --noinput'.format(SENTRY_BIN).split())
+
+    start_restart(SENTRY_WEB_SERVICE)
+    start_restart(SENTRY_WORKER_SERVICE)
+    start_restart(SENTRY_CRON_SERVICE)
 
     status_set('active', 'Sentry database available')
     set_flag('sentry.database.available')
@@ -241,3 +254,10 @@ def block_on_no_redis():
     status_set('blocked',
                "Need redis info via config or relation to proceed")
     return
+
+
+@hook('upgrade-charm')
+def migrate_sentry_db_on_upgrade():
+    status_set('maintenance', 'Migrating Sentry DB')
+    call('{} upgrade --noinput'.format(SENTRY_BIN).split())
+    status_set('active', 'Sentry DB migration complete')

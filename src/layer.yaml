@@ -12,7 +12,7 @@ options:
       channel: stable
       devmode: false
       jailmode: false
-      dangerous: true
-      classic: true
+      dangerous: false
+      classic: false
       revision: null
-repo: "https://github.com:jamesbeedy/layer-sentry"
+repo: "https://github.com:omnivector-solutions/layer-sentry"
