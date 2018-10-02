@@ -259,5 +259,5 @@ def block_on_no_redis():
 @hook('upgrade-charm')
 def migrate_sentry_db_on_upgrade():
     status_set('maintenance', 'Migrating Sentry DB')
-    call('{} upgrade --no-input'.format(SENTRY_BIN).split())
+    call('{} upgrade --noinput'.format(SENTRY_BIN).split())
     status_set('active', 'Sentry migration complete')
