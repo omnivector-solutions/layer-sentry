@@ -53,6 +53,7 @@ def sentry_init():
     call('{} init'.format(SENTRY_BIN).split())
     set_flag('sentry.init.available')
 
+
 @hook('start')
 def set_started_flag():
     set_flag('sentry.juju.started')
@@ -66,7 +67,7 @@ def set_sentry_system_key_to_leader():
     if system_secret_key:
         pass
     else:
-        system_secret_key=gen_random_string()
+        system_secret_key = gen_random_string()
     leader_set(system_secret_key=system_secret_key)
 
 
