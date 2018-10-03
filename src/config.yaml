@@ -34,5 +34,9 @@ options:
     default: ""
     description: |
       Secret key for session signing
- 
- 
+  web-override:
+    type: string
+    default: ""
+    description: |
+      systemd service override for snap.sentry.web.service.
+      Can be used to configure an http proxy.

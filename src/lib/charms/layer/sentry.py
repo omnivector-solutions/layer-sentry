@@ -8,6 +8,7 @@ from charmhelpers.core import unitdata
 from charmhelpers.core.hookenv import charm_dir, config
 
 from charmhelpers.core.host import (
+    mkdir,
     service_running,
     service_start,
     service_restart
@@ -35,6 +36,10 @@ SENTRY_CONFIG_YML = \
 SENTRY_BIN = \
     os.path.join('/', 'snap', 'bin', 'sentry')
 
+SENTRY_WEB_SERVICE_OVERRIDE = \
+    os.path.join('/', 'etc', 'systemd', 'system',
+                 SENTRY_WEB_SERVICE + '.service.d',
+                 'override.conf')
 
 kv = unitdata.kv()
 
@@ -80,6 +85,26 @@ def render_sentry_config(secrets=None):
     spew(SENTRY_CONFIG_PY, sentry_config_py_tmpl)
 
 
+def render_web_override():
+    """ Render override.conf for the sentry.web systemd service
+    """
+    if os.path.exists(SENTRY_WEB_SERVICE_OVERRIDE):
+        os.remove(SENTRY_WEB_SERVICE_OVERRIDE)
+
+    conf = config()
+    env = conf['web-override']
+
+    if not env:
+        return
+
+    mkdir(os.path.dirname(SENTRY_WEB_SERVICE_OVERRIDE))
+
+    web_override_tmpl = \
+        load_template(
+            'web.override.conf.j2').render(environment=env)
+    spew(SENTRY_WEB_SERVICE_OVERRIDE, web_override_tmpl)
+
+
 def load_template(name, path=None):
     """ load template file
     :param str name: name of template file
@@ -106,7 +131,6 @@ def return_secrets(secrets=None):
     """Return secrets dict
     """
 
-    conf = config()
     if secrets:
         secrets_mod = secrets
     else:
@@ -121,16 +145,4 @@ def return_secrets(secrets=None):
     secrets_mod['postgresql_dbname'] = kv.get('postgresql_dbname')
     secrets_mod['system_secret_key'] = leader_get('system_secret_key')
 
-    if conf.get('aws-key'):
-        secrets_mod['AWS_KEY'] = config('aws-key')
-    if conf.get('aws-secret'):
-        secrets_mod['AWS_SECRET'] = config('aws-secret')
-    if conf.get('aws-region'):
-        secrets_mod['AWS_REGION'] = config('aws-region')
-
-    if conf.get('secrets', ''):
-        secrets_from_config = config('secrets').strip().split(",")
-        for secret in secrets_from_config:
-            s = secret.split("=")
-            secrets_mod[s[0]] = s[1]
     return secrets_mod
