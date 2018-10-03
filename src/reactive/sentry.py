@@ -84,6 +84,23 @@ def check_user_provided_database():
     set_flag('manual.database.check.available')
 
 
+@when_not('manual.github.check.available')
+def check_user_provided_github():
+    if not config('github-app-id') and not config('github-api-secret'):
+        clear_flag('manual.github.check.available')
+        log("Manual GitHub not configured")
+    else:
+        options = {
+            'github_app_id': config('github-app-id'),
+            'github_api_secret': config('github-api-secret'),
+            'github_extended_permissions': config('github-extended-permissions'),
+            'social_auth_redirect_is_https': config('social-auth-redirect-is-https')
+        }
+        { kv.set(k, v) for k, v in options.items() }
+        clear_flag('sentry.config.available')
+    set_flag('manual.github.check.available')
+
+
 @when_not('manual.redis.check.available')
 def check_user_provided_redis():
     if not config('redis-uri'):
