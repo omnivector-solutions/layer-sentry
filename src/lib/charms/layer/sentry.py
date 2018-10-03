@@ -120,6 +120,10 @@ def return_secrets(secrets=None):
     secrets_mod['postgresql_password'] = kv.get('postgresql_password')
     secrets_mod['postgresql_dbname'] = kv.get('postgresql_dbname')
     secrets_mod['system_secret_key'] = leader_get('system_secret_key')
+    secrets_mod['github_app_id'] = kv.get('github_app_id')
+    secrets_mod['github_api_secret'] = kv.get('github_api_secret')
+    secrets_mod['github_extended_permissions'] = kv.get('github_extended_permissions')
+    secrets_mod['social_auth_redirect_is_https'] = kv.get('social_auth_redirect_is_https')
 
     if conf.get('aws-key'):
         secrets_mod['AWS_KEY'] = config('aws-key')
