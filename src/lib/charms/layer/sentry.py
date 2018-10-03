@@ -136,13 +136,19 @@ def return_secrets(secrets=None):
     else:
         secrets_mod = {}
 
-    secrets_mod['redis_host'] = kv.get('redis_host')
-    secrets_mod['redis_port'] = kv.get('redis_port')
-    secrets_mod['postgresql_host'] = kv.get('postgresql_host')
-    secrets_mod['postgresql_port'] = kv.get('postgresql_port')
-    secrets_mod['postgresql_user'] = kv.get('postgresql_user')
-    secrets_mod['postgresql_password'] = kv.get('postgresql_password')
-    secrets_mod['postgresql_dbname'] = kv.get('postgresql_dbname')
+    for k in ('redis_host',
+              'redis_port',
+              'postgresql_host',
+              'postgresql_port',
+              'postgresql_user',
+              'postgresql_password',
+              'postgresql_dbname',
+              'github_app_id',
+              'github_api_secret',
+              'github_extended_permissions',
+              'social_auth_redirect_is_https'):
+        secrets_mod[k] = kv.get(k)
+
     secrets_mod['system_secret_key'] = leader_get('system_secret_key')
 
     return secrets_mod

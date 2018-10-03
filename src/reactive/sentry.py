@@ -85,6 +85,21 @@ def check_user_provided_database():
     set_flag('manual.database.check.available')
 
 
+@when_any('config.changed.github-app-id',
+          'config.changed.github-api-secret',
+          'config.changed.github-extended-permissions',
+          'config.changed.social-auth-redirect-is-https')
+def check_user_provided_github():
+    options = {
+       'github_app_id': config('github-app-id'),
+       'github_api_secret': config('github-api-secret'),
+       'github_extended_permissions': config('github-extended-permissions'),
+       'social_auth_redirect_is_https': config('social-auth-redirect-is-https')
+    }
+    {kv.set(k, v) for k, v in options.items()}
+    clear_flag('sentry.config.available')
+
+
 @when_not('manual.redis.check.available')
 def check_user_provided_redis():
     if not config('redis-uri'):
@@ -170,7 +185,7 @@ def get_redis_relation_info():
           'sentry.manual.redis.available')
 @when_any('sentry.juju.database.available',
           'sentry.manual.database.available')
-@when_not('sentry.init.config.available')
+@when_not('sentry.config.available')
 def init_sentry():
     """Write out sentry configs, restart daemons to initialize.
     """
@@ -178,11 +193,15 @@ def init_sentry():
 
     render_sentry_config()
 
+    start_restart(SENTRY_WEB_SERVICE)
+    start_restart(SENTRY_WORKER_SERVICE)
+    start_restart(SENTRY_CRON_SERVICE)
+
     status_set('active', 'Sentry configured')
-    set_flag('sentry.init.config.available')
+    set_flag('sentry.config.available')
 
 
-@when('sentry.init.config.available')
+@when('sentry.config.available')
 @when_not('sentry.database.available')
 def init_sentry_db():
     """Initialize the sentry database
@@ -269,4 +288,3 @@ def migrate_sentry_db_on_upgrade():
     status_set('maintenance', 'Migrating Sentry DB')
     call('{} upgrade --noinput'.format(SENTRY_BIN).split())
     status_set('active', 'Sentry DB migration complete')
-
