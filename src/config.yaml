@@ -11,14 +11,16 @@ options:
       Database name
   admin-email:
     type: string
-    default: "admin@admin.com"
+    default: "admin@example.com"
     description: |
-      ADMIN EMAIL
+      Email used to set up the admin account.
+      Changing this after the initial setup is a no-op.
   admin-password:
     type: string
     default: "mysecret"
     description: |
-      ADMIN PASSWORD
+      Password used to set up the admin account.
+      Changing this after the initial setup is a no-op.
   db-uri:
     type: string
     default: ""
