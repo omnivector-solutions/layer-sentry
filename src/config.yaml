@@ -32,8 +32,8 @@ options:
     description: |
       SMTP server hostname
   email-server-port:
-    type: string
-    default: ""
+    type: int
+    default:
     description: |
       SMTP server port
   email-server-username:

@@ -12,20 +12,20 @@ filestore.options:
   location: '/tmp/sentry-files'
 
 {% if secrets['email_server_host'] -%}
-mail.host: secrets['email_server_host']
+mail.host: '{{secrets['email_server_host']}}'
 {% endif -%}
 {% if secrets['email_server_port'] -%}
-mail.port: secrets['email_server_port']
+mail.port: {{secrets['email_server_port']}}
 {% endif -%}
 {% if secrets['email_server_username'] -%}
-mail.username: secrets['email_server_username']
+mail.username: '{{secrets['email_server_username']}}'
 {% endif -%}
 {% if secrets['email_server_password'] -%}
-mail.password: secrets['email_server_password']
+mail.password: '{{secrets['email_server_password']}}'
 {% endif -%}
 {% if secrets['email_server_tls'] -%}
-mail.use-tls: secrets['email_server_tls']
+mail.use-tls: '{{secrets['email_server_tls']}}'
 {% endif -%}
 {% if secrets['email_from'] -%}
-mail.from: secrets['email_from']
+mail.from: '{{secrets['email_from']}}'
 {% endif -%}
