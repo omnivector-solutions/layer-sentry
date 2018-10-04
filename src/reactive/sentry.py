@@ -101,6 +101,25 @@ def check_user_provided_github():
     clear_flag('sentry.config.available')
 
 
+@when_any('config.changed.email-server-host'
+          'config.changed.email-server-port',
+          'config.changed.email-server-username',
+          'config.changed.email-server-password',
+          'config.changed.email-server-tls',
+          'config.changed.email-from')
+def update_email_settings():
+    options = {
+       'email_server_host': config('email-server-host'),
+       'email_server_port': config('email-server-port'),
+       'email_server_username': config('email-server-username'),
+       'email_server_password': config('email-server-password'),
+       'email_server_tls': config('email-server-tls'),
+       'email_from': config('email-from'),
+    }
+    {kv.set(k, v) for k, v in options.items()}
+    clear_flag('sentry.config.available')
+
+
 @when_not('manual.redis.check.available')
 def check_user_provided_redis():
     if not config('redis-uri'):

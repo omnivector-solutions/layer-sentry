@@ -26,6 +26,36 @@ options:
     default: ""
     description: |
       Postgresql URI
+  email-server-host:
+    type: string
+    default: ""
+    description: |
+      SMTP server hostname
+  email-server-port:
+    type: string
+    default: ""
+    description: |
+      SMTP server port
+  email-server-username:
+    type: string
+    default: ""
+    description: |
+      SMTP server username
+  email-server-password:
+    type: string
+    default: ""
+    description: |
+      SMTP server password
+  email-server-tls:
+    type: boolean
+    default: False
+    description: |
+      Set to True if you must use TLS to connect to your SMTP server
+  email-from:
+    type: string
+    default: ""
+    description: |
+      Email address to send on behalf of
   github-app-id:
     type: string
     default: ""
