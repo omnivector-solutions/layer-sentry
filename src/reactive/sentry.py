@@ -13,6 +13,7 @@ from charms.reactive import (
 
 from charmhelpers.core.hookenv import (
     config,
+    is_leader,
     local_unit,
     log,
     open_port,
@@ -221,7 +222,8 @@ def init_sentry():
     set_flag('sentry.config.available')
 
 
-@when('sentry.config.available')
+@when('sentry.config.available',
+      'leadership.is_leader')
 @when_not('sentry.database.available')
 def init_sentry_db():
     """Initialize the sentry database
@@ -238,8 +240,8 @@ def init_sentry_db():
     set_flag('sentry.database.available')
 
 
-@when('sentry.database.available')
-@when('leadership.is_leader')
+@when('sentry.database.available',
+      'leadership.is_leader')
 @when_not('sentry.superuser.available')
 def create_sentry_superuser():
     status_set('maintenance', 'Creating Sentry superuser')
@@ -254,12 +256,6 @@ def create_sentry_superuser():
     call(cmd.split())
     leader_set(superuser_created=True)
     status_set('active', 'Sentry superuser available')
-    set_flag('sentry.superuser.available')
-
-
-@when('leadership.set.superuser_created')
-@when_not('sentry.superuser.available')
-def set_superuser_flag():
     set_flag('sentry.superuser.available')
 
 
@@ -304,7 +300,8 @@ def block_on_no_redis():
     return
 
 
-@when('config.changed.web-override')
+@when('sentry.juju.started',
+      'config.changed.web-override')
 def update_web_override():
     render_web_override()
     call(['systemctl', 'daemon-reload'])
@@ -313,9 +310,10 @@ def update_web_override():
 
 @hook('upgrade-charm')
 def migrate_sentry_db_on_upgrade():
-    status_set('maintenance', 'Migrating Sentry DB')
-    call('{} upgrade --noinput'.format(SENTRY_BIN).split())
-    status_set('active', 'Sentry DB migration complete')
+    if is_leader():
+        status_set('maintenance', 'Migrating Sentry DB')
+        call('{} upgrade --noinput'.format(SENTRY_BIN).split())
+        status_set('active', 'Sentry DB migration complete')
 
 
 # Set up Nagios checks when the nrpe-external-master subordinate is related

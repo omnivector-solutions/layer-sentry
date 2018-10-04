@@ -24,7 +24,7 @@ mail.username: '{{secrets['email_server_username']}}'
 mail.password: '{{secrets['email_server_password']}}'
 {% endif -%}
 {% if secrets['email_server_tls'] -%}
-mail.use-tls: '{{secrets['email_server_tls']}}'
+mail.use-tls: {{secrets['email_server_tls']}}
 {% endif -%}
 {% if secrets['email_from'] -%}
 mail.from: '{{secrets['email_from']}}'
