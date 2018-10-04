@@ -35,7 +35,7 @@ from charms.layer.sentry import (
     SENTRY_CRON_SERVICE
 )
 
-from charms.leadership import leader_get, leader_set
+from charms.leadership import leader_set
 
 
 SENTRY_HTTP_PORT = 9000
@@ -239,9 +239,10 @@ def init_sentry_db():
 
 
 @when('sentry.database.available')
+@when('leadership.is_leader')
 @when_not('sentry.superuser.available')
 def create_sentry_superuser():
-    status_set('maintenance', 'Creating Sentry SU')
+    status_set('maintenance', 'Creating Sentry superuser')
 
     ctxt = {'bin': SENTRY_BIN,
             'email': config('admin-email'),
@@ -251,7 +252,14 @@ def create_sentry_superuser():
            '--superuser --no-input'.format(**ctxt))
 
     call(cmd.split())
-    status_set('active', 'Sentry SU available')
+    leader_set(superuser_created=True)
+    status_set('active', 'Sentry superuser available')
+    set_flag('sentry.superuser.available')
+
+
+@when('leadership.set.superuser_created')
+@when_not('sentry.superuser.available')
+def set_superuser_flag():
     set_flag('sentry.superuser.available')
 
 
