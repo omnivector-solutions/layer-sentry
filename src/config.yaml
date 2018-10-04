@@ -1,14 +1,4 @@
 options:
-  db-extensions:
-    type: string
-    default: "citext"
-    description: |
-      Database extensions
-  db-name:
-    type: string
-    default: "sentry"
-    description: |
-      Database name
   admin-email:
     type: string
     default: "admin@example.com"
@@ -21,6 +11,16 @@ options:
     description: |
       Password used to set up the admin account.
       Changing this after the initial setup is a no-op.
+  db-extensions:
+    type: string
+    default: "citext"
+    description: |
+      Database extensions
+  db-name:
+    type: string
+    default: "sentry"
+    description: |
+      Database name
   db-uri:
     type: string
     default: ""
