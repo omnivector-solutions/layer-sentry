@@ -135,3 +135,18 @@ SENTRY_WEB_OPTIONS = {
     # 'workers': 3,  # the number of web workers
     # 'protocol': 'uwsgi',  # Enable uwsgi protocol instead of http
 }
+
+###########
+# Plugins #
+###########
+{% if secrets['github_app_id'] and secrets['github_api_secret'] -%}
+GITHUB_APP_ID = "{{ secrets['github_app_id'] }}"
+GITHUB_API_SECRET = "{{ secrets['github_api_secret'] }}"
+GITHUB_EXTENDED_PERMISSIONS = {{ secrets['github_extended_permissions'] }}
+{%- endif %}
+
+{% if secrets['social_auth_redirect_is_https'] -%}
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+{% endif %}

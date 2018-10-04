@@ -24,11 +24,31 @@ options:
     default: ""
     description: |
       Postgresql URI
+  github-app-id:
+    type: string
+    default: ""
+    description: |
+      GitHub Application Client ID
+  github-api-secret:
+    type: string
+    default: ""
+    description: |
+      GitHub Application Client Secret
+  github-extended-permissions:
+    type: string
+    default: "['repo']"
+    description: |
+      Python formatted list of permissions for the GitHub plugin
   redis-uri:
     type: string
     default: ""
     description: |
       Redis URI
+  social-auth-redirect-is-https:
+    type: boolean
+    default: true
+    description: |
+      Use https for social auth redirects
   system-secret-key:
     type: string
     default: ""
