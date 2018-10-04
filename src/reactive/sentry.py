@@ -13,6 +13,7 @@ from charms.reactive import (
 
 from charmhelpers.core.hookenv import (
     config,
+    local_unit,
     log,
     open_port,
     status_set,
@@ -289,3 +290,41 @@ def migrate_sentry_db_on_upgrade():
     call('{} upgrade --noinput'.format(SENTRY_BIN).split())
     status_set('active', 'Sentry DB migration complete')
 
+
+# Set up Nagios checks when the nrpe-external-master subordinate is related
+@when('nrpe-external-master.available')
+@when_not('sentry.nagios-setup.complete')
+def setup_nagios(nagios):
+    conf = config()
+    unit_name = local_unit()
+    check_base = '/usr/lib/nagios/plugins/'
+    process_check = check_base + 'check_procs'
+
+    web_check = [process_check, '-c', '4:4', '-a', '"[Sentry] uWSGI"']
+    nagios.add_check(web_check, name="sentry.web_process",
+                     description="Check for sentry.web processes",
+                     context=conf['nagios_context'],
+                     servicegroups=conf['nagios_servicegroups'],
+                     unit=unit_name)
+
+    worker_check = [process_check, '-c', '2:2', '-a', 'celeryd']
+    nagios.add_check(worker_check, name="sentry.worker_process",
+                     description="Check for sentry.worker processes",
+                     context=conf['nagios_context'],
+                     servicegroups=conf['nagios_servicegroups'],
+                     unit=unit_name)
+
+    cron_check = [process_check, '-c', '1:1', '-a', '"celery beat"']
+    nagios.add_check(cron_check, name="sentry.cron_process",
+                     description="Check for sentry.cron processes",
+                     context=conf['nagios_context'],
+                     servicegroups=conf['nagios_servicegroups'],
+                     unit=unit_name)
+    set_flag('sentry.nagios-setup.complete')
+
+
+# This is triggered on any config-changed, and after an upgrade-charm - you
+# don't get the latter with @when('config.changed')
+@hook('config-changed')
+def set_nrpe_flag():
+    clear_flag('sentry.nagios-setup.complete')
