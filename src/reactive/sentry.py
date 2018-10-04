@@ -35,7 +35,7 @@ from charms.layer.sentry import (
     SENTRY_CRON_SERVICE
 )
 
-from charms.leadership import leader_get, leader_set
+from charms.leadership import leader_set
 
 
 SENTRY_HTTP_PORT = 9000
@@ -96,6 +96,25 @@ def check_user_provided_github():
        'github_api_secret': config('github-api-secret'),
        'github_extended_permissions': config('github-extended-permissions'),
        'social_auth_redirect_is_https': config('social-auth-redirect-is-https')
+    }
+    {kv.set(k, v) for k, v in options.items()}
+    clear_flag('sentry.config.available')
+
+
+@when_any('config.changed.email-server-host'
+          'config.changed.email-server-port',
+          'config.changed.email-server-username',
+          'config.changed.email-server-password',
+          'config.changed.email-server-tls',
+          'config.changed.email-from')
+def update_email_settings():
+    options = {
+       'email_server_host': config('email-server-host'),
+       'email_server_port': config('email-server-port'),
+       'email_server_username': config('email-server-username'),
+       'email_server_password': config('email-server-password'),
+       'email_server_tls': config('email-server-tls'),
+       'email_from': config('email-from'),
     }
     {kv.set(k, v) for k, v in options.items()}
     clear_flag('sentry.config.available')
@@ -220,9 +239,10 @@ def init_sentry_db():
 
 
 @when('sentry.database.available')
+@when('leadership.is_leader')
 @when_not('sentry.superuser.available')
 def create_sentry_superuser():
-    status_set('maintenance', 'Creating Sentry SU')
+    status_set('maintenance', 'Creating Sentry superuser')
 
     ctxt = {'bin': SENTRY_BIN,
             'email': config('admin-email'),
@@ -232,7 +252,14 @@ def create_sentry_superuser():
            '--superuser --no-input'.format(**ctxt))
 
     call(cmd.split())
-    status_set('active', 'Sentry SU available')
+    leader_set(superuser_created=True)
+    status_set('active', 'Sentry superuser available')
+    set_flag('sentry.superuser.available')
+
+
+@when('leadership.set.superuser_created')
+@when_not('sentry.superuser.available')
+def set_superuser_flag():
     set_flag('sentry.superuser.available')
 
 

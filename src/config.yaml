@@ -1,4 +1,16 @@
 options:
+  admin-email:
+    type: string
+    default: "admin@example.com"
+    description: |
+      Email used to set up the admin account.
+      Changing this after the initial setup is a no-op.
+  admin-password:
+    type: string
+    default: "mysecret"
+    description: |
+      Password used to set up the admin account.
+      Changing this after the initial setup is a no-op.
   db-extensions:
     type: string
     default: "citext"
@@ -9,21 +21,41 @@ options:
     default: "sentry"
     description: |
       Database name
-  admin-email:
-    type: string
-    default: "admin@admin.com"
-    description: |
-      ADMIN EMAIL
-  admin-password:
-    type: string
-    default: "mysecret"
-    description: |
-      ADMIN PASSWORD
   db-uri:
     type: string
     default: ""
     description: |
       Postgresql URI
+  email-server-host:
+    type: string
+    default: ""
+    description: |
+      SMTP server hostname
+  email-server-port:
+    type: int
+    default:
+    description: |
+      SMTP server port
+  email-server-username:
+    type: string
+    default: ""
+    description: |
+      SMTP server username
+  email-server-password:
+    type: string
+    default: ""
+    description: |
+      SMTP server password
+  email-server-tls:
+    type: boolean
+    default: False
+    description: |
+      Set to True if you must use TLS to connect to your SMTP server
+  email-from:
+    type: string
+    default: ""
+    description: |
+      Email address to send on behalf of
   github-app-id:
     type: string
     default: ""

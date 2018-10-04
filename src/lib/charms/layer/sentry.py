@@ -146,7 +146,13 @@ def return_secrets(secrets=None):
               'github_app_id',
               'github_api_secret',
               'github_extended_permissions',
-              'social_auth_redirect_is_https'):
+              'social_auth_redirect_is_https',
+              'email_server_host',
+              'email_server_port',
+              'email_server_username',
+              'email_server_password',
+              'email_server_tls',
+              'email_from'):
         secrets_mod[k] = kv.get(k)
 
     secrets_mod['system_secret_key'] = leader_get('system_secret_key')
