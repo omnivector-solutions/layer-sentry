@@ -259,6 +259,15 @@ def create_sentry_superuser():
     set_flag('sentry.superuser.available')
 
 
+# This is needed to set the flag on non-leader units
+# so that they won't try to create the superuser should
+# they become leader later on.
+@when('leadership.set.superuser_created')
+@when_not('sentry.superuser.available')
+def set_superuser_flag():
+    set_flag('sentry.superuser.available')
+
+
 @when('sentry.database.available',
       'sentry.superuser.available')
 @when_not('sentry.init.complete')
