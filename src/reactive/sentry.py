@@ -362,3 +362,23 @@ def setup_nagios(nagios):
 @hook('config-changed')
 def set_nrpe_flag():
     clear_flag('sentry.nagios-setup.complete')
+
+
+@when('endpoint.aws-elb.joined',
+      'endpoint.aws.joined')
+@when_not('aws-elb.data.sent')
+def send_data_to_aws_elb_endpoint():
+    aws_elb_endpoint = endpoint_from_flag('endpoint.aws-elb.joined')
+    aws_integrator_endpoint = endpoint_from_flag('endpoint.aws.joined')
+    aws_elb_endpoint.configure(
+        instance_id=aws_integrator_endpoint.instance_id,
+        instance_region=aws_integrator_endpoint.region,
+        instance_port=SENTRY_HTTP_PORT,
+        health_check_endpoint="/"
+    )
+    set_flag('aws-elb.data.sent')
+
+
+@when_not('endpoint.aws-elb.joined')
+def remove_aws_elb_data_sent_flag():
+    clear_flag('aws-elb.data.sent')
