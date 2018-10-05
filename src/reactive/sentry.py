@@ -102,6 +102,18 @@ def check_user_provided_github():
     clear_flag('sentry.config.available')
 
 
+@when_any('config.changed.slack-client-id',
+          'config.changed.slack-client-secret')
+def check_user_provided_slack():
+    options = {
+       'slack_client_id': config('slack-client-id'),
+       'slack_client_secret': config('slack-client-secret'),
+       'slack_verification_token': config('slack-verification-token'),
+    }
+    {kv.set(k, v) for k, v in options.items()}
+    clear_flag('sentry.config.available')
+
+
 @when_any('config.changed.email-server-host'
           'config.changed.email-server-port',
           'config.changed.email-server-username',
