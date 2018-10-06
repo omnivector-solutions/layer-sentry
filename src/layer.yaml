@@ -5,6 +5,8 @@ includes:
   - 'layer:nagios'
   - 'layer:snap'
   - 'interface:http'
+  - 'interface:aws-integration'
+  - 'interface:aws-elb'
   - 'interface:pgsql'
   - 'interface:redis'
 options:
