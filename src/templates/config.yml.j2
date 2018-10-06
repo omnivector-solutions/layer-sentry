@@ -33,7 +33,7 @@ mail.from: '{{secrets['email_from']}}'
 slack.client-id: '{{secrets['slack_client_id']}}'
 {% endif -%}
 {% if secrets['slack_client_secret'] -%}
-slack.client-secrets: '{{secrets['slack_client_secret']}}'
+slack.client-secret: '{{secrets['slack_client_secret']}}'
 {% endif -%}
 {% if secrets['slack_verification_token'] -%}
 slack.verification-token: '{{secrets['slack_verification_token']}}'
