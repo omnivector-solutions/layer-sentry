@@ -13,11 +13,15 @@ series:
 provides:
   http:
     interface: http
+  aws-elb:
+    interface: aws-elb
 requires:
   redis:
     interface: redis
   postgresql:
     interface: pgsql
+  aws:
+    interface: aws-integration
 resources:
   sentry:
     type: file

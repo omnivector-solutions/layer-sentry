@@ -76,6 +76,21 @@ options:
     default: ""
     description: |
       Redis URI
+  slack-client-id:
+    type: string
+    default: ""
+    description: |
+      Slack App client-id
+   slack-client-secret:
+    type: string
+    default: ""
+    description: |
+      Slack App client-secret
+   slack-verification-token:
+    type: string
+    default: ""
+    description: |
+      Slack App verification-token
   social-auth-redirect-is-https:
     type: boolean
     default: true

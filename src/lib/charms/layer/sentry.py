@@ -136,23 +136,26 @@ def return_secrets(secrets=None):
     else:
         secrets_mod = {}
 
-    for k in ('redis_host',
-              'redis_port',
+    for k in ('email_server_host',
+              'email_server_port',
+              'email_server_username',
+              'email_server_password',
+              'email_server_tls',
+              'email_from',
+              'github_app_id',
+              'github_api_secret',
+              'github_extended_permissions',
               'postgresql_host',
               'postgresql_port',
               'postgresql_user',
               'postgresql_password',
               'postgresql_dbname',
-              'github_app_id',
-              'github_api_secret',
-              'github_extended_permissions',
-              'social_auth_redirect_is_https',
-              'email_server_host',
-              'email_server_port',
-              'email_server_username',
-              'email_server_password',
-              'email_server_tls',
-              'email_from'):
+              'redis_host',
+              'redis_port',
+              'slack_client_id',
+              'slack_client_secret',
+              'slack_verification_token',
+              'social_auth_redirect_is_https'):
         secrets_mod[k] = kv.get(k)
 
     secrets_mod['system_secret_key'] = leader_get('system_secret_key')

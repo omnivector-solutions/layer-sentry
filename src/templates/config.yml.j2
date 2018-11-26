@@ -29,3 +29,12 @@ mail.use-tls: {{secrets['email_server_tls']}}
 {% if secrets['email_from'] -%}
 mail.from: '{{secrets['email_from']}}'
 {% endif -%}
+{% if secrets['slack_client_id'] -%}
+slack.client-id: '{{secrets['slack_client_id']}}'
+{% endif -%}
+{% if secrets['slack_client_secret'] -%}
+slack.client-secret: '{{secrets['slack_client_secret']}}'
+{% endif -%}
+{% if secrets['slack_verification_token'] -%}
+slack.verification-token: '{{secrets['slack_verification_token']}}'
+{% endif -%}
