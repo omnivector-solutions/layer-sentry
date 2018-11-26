@@ -309,12 +309,18 @@ def block_on_no_redis():
     return
 
 
+@when('config.changed.web-override')
+def set_web_override_rendering_flag():
+    set_flag('sentry.web-override.needs-rendering')
+
+
 @when('sentry.juju.started',
-      'config.changed.web-override')
+      'sentry.web-override.needs-rendering')
 def update_web_override():
     render_web_override()
     call(['systemctl', 'daemon-reload'])
     start_restart(SENTRY_WEB_SERVICE)
+    clear_flag('sentry.web-override.needs-rendering')
 
 
 @hook('upgrade-charm')
