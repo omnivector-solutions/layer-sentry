@@ -341,7 +341,7 @@ def setup_nagios(nagios):
                      servicegroups=conf['nagios_servicegroups'],
                      unit=unit_name)
 
-    worker_check = [process_check, '-c', '2:2', '-a', 'celeryd']
+    worker_check = [process_check, '-c', '2:', '-a', 'celeryd']
     nagios.add_check(worker_check, name="sentry.worker_process",
                      description="Check for sentry.worker processes",
                      context=conf['nagios_context'],
