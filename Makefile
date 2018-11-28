@@ -11,7 +11,7 @@ lint: ## Run linter
 	@tox -e pycodestyle
 
 build: clean ## Build charm
-	@charm build ./src --log-level INFO --output-dir .
+	@TERM=linux charm build ./src --log-level INFO --output-dir .
 
 deploy: build ## Deploy charm 
 	juju deploy $(CHARM_BUILD_DIR)/$(CHARM_NAME)
