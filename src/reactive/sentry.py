@@ -368,3 +368,19 @@ def setup_nagios(nagios):
 @hook('config-changed')
 def set_nrpe_flag():
     clear_flag('sentry.nagios-setup.complete')
+
+
+@when('endpoint.metrics.joined')
+@when_not('sentry.statsd.enabled')
+def enable_statsd():
+    kv.set('enable_statsd', True)
+    set_flag('sentry.statsd.enabled')
+    clear_flag('sentry.config.available')
+
+
+@when_not('endpoint.metrics.joined')
+@when('sentry.statsd.enabled')
+def disable_statsd():
+    kv.set('enable_statsd', False)
+    remove_flag('sentry.statsd.enabled')
+    clear_flag('sentry.config.available')
