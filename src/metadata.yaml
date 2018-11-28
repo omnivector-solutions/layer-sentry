@@ -13,6 +13,8 @@ series:
 provides:
   http:
     interface: http
+  metrics:
+    interface: sentry-metrics
 requires:
   redis:
     interface: redis

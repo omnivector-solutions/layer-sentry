@@ -150,3 +150,11 @@ SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 {% endif %}
+
+{% if secrets['enable_statsd'] -%}
+SENTRY_METRICS_BACKEND = 'sentry.metrics.statsd.StatsdMetricsBackend'
+SENTRY_METRICS_OPTIONS = {
+    'host': 'localhost',
+    'port': 8125,
+}
+{% endif %}
