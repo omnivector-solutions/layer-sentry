@@ -76,6 +76,11 @@ options:
     default: ""
     description: |
       Redis URI
+  beacon:
+    type: boolean
+    default: true
+    description: |
+      Enable or disable periodically sending beacons to sentry.io
   social-auth-redirect-is-https:
     type: boolean
     default: true

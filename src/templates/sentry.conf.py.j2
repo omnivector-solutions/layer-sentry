@@ -136,6 +136,10 @@ SENTRY_WEB_OPTIONS = {
     # 'protocol': 'uwsgi',  # Enable uwsgi protocol instead of http
 }
 
+{% if secrets['beacon'] or secrets['beacon'] == False -%}
+SENTRY_BEACON = {{ secrets['beacon'] }}
+{%- endif %}
+
 ###########
 # Plugins #
 ###########

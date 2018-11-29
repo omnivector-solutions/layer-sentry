@@ -121,6 +121,15 @@ def update_email_settings():
     clear_flag('sentry.config.available')
 
 
+@when('config.changed.beacon')
+def update_beacon_settings():
+    options = {
+       'beacon': config('beacon'),
+    }
+    {kv.set(k, v) for k, v in options.items()}
+    clear_flag('sentry.config.available')
+
+
 @when_not('manual.redis.check.available')
 def check_user_provided_redis():
     if not config('redis-uri'):
