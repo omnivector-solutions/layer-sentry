@@ -153,7 +153,8 @@ def return_secrets(secrets=None):
               'email_server_password',
               'email_server_tls',
               'email_from',
-              'enable_statsd'):
+              'enable_statsd',
+              'beacon'):
         secrets_mod[k] = kv.get(k)
 
     secrets_mod['system_secret_key'] = leader_get('system_secret_key')
